@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"sync"
+
+	"github.com/SanishKumar/story-builder/server/ai"
 
 	pb "github.com/SanishKumar/story-builder/proto/story"
 	"google.golang.org/grpc"
@@ -29,9 +32,13 @@ func NewStoryServer() *StoryServer {
 
 // GenerateSegment calls the free generative AI API to generate text.
 func (s *StoryServer) GenerateSegment(ctx context.Context, req *pb.GenerateRequest) (*pb.GenerateResponse, error) {
-	// Here, integrate your free generative AI API call.
-	// For demo, we'll use a placeholder response.
-	generatedText := "Once upon a time, in a land of endless possibilities..."
+	if req.GetPrompt() == "" {
+		return nil, fmt.Errorf("prompt cannot be empty")
+	}
+	generatedText, err := ai.GenerateText(req.GetPrompt())
+	if err != nil {
+		return nil, err
+	}
 	return &pb.GenerateResponse{GeneratedText: generatedText}, nil
 }
 
